@@ -29,6 +29,7 @@ export function createPerson(
         id: randomUUID(),
         name,
         age,
+        profilePicture: "https://i.pravatar.cc/100?img=12",
 
         homeId: home.id,
         workplaceId: workplace.id,
@@ -41,6 +42,14 @@ export function createPerson(
 
         schedule: [],
 
-        movement: null
+        movement: null,
+
+        travelMode: "cycling",
+
+        movementSpeed: {
+            walking: 1.4,
+            cycling: 4.5,
+            driving: 12
+        }
     };
 }

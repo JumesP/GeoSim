@@ -36,6 +36,7 @@ export type Person = {
     id: string;
     name: string;
     age: number;
+    profilePicture: string;
 
     homeId: string;
     workplaceId: string;
@@ -46,6 +47,8 @@ export type Person = {
 
     destinationId: string | null;
 
+    travelMode: TravelMode;
+
     schedule: ScheduleEntry[];
 
     movement: {
@@ -54,4 +57,15 @@ export type Person = {
         departureTime: Date;
         arrivalTime: Date;
     } | null;
+
+    movementSpeed: {
+        walking: 1.4,
+        cycling: 4.5,
+        driving: 12
+    };
 };
+
+export type TravelMode =
+    | "walking"
+    | "cycling"
+    | "driving";

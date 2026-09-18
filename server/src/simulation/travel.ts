@@ -1,19 +1,40 @@
-import type { Coordinate } from "../world/types.js";
+import type { Coordinate, Person } from "../world/types.js";
+
+const averageWalkingSpeed = 1.4;
+const averageCyclingSpeed = 4.1;
 
 function calculateDistance(
     a: Coordinate,
     b: Coordinate
 ): number {
-    const latitudeDifference = b.latitude - a.latitude;
-    const longitudeDifference = b.longitude - a.longitude;
+    const earthRadius = 6_371_000;
 
-    return Math.sqrt(
-        latitudeDifference ** 2 +
-        longitudeDifference ** 2
-    );
+    const latitude1 = a.latitude * Math.PI / 180;
+    const latitude2 = b.latitude * Math.PI / 180;
+
+    const latitudeDifference =
+        (b.latitude - a.latitude) * Math.PI / 180;
+
+    const longitudeDifference =
+        (b.longitude - a.longitude) * Math.PI / 180;
+
+    const haversine =
+        Math.sin(latitudeDifference / 2) ** 2 +
+        Math.cos(latitude1) *
+        Math.cos(latitude2) *
+        Math.sin(longitudeDifference / 2) ** 2;
+
+    const angularDistance =
+        2 * Math.atan2(
+            Math.sqrt(haversine),
+            Math.sqrt(1 - haversine)
+        );
+
+    return earthRadius * angularDistance;
 }
 
 export function calculateTravelTime(
+    person: Person,
     origin: Coordinate,
     destination: Coordinate
 ): number {
@@ -22,12 +43,11 @@ export function calculateTravelTime(
         destination
     );
 
-    // Temporary approximation.
-    // We'll replace this with actual routing later.
-    const speed = 0.01;
+    const speed =
+        person.movementSpeed[person.travelMode];
 
-    return Math.max(
-        5,
-        distance / speed
-    );
+    const travelTimeSeconds =
+        distance / speed;
+
+    return travelTimeSeconds / 60;
 }

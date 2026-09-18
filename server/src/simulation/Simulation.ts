@@ -53,6 +53,7 @@ export class Simulation {
 
                 if (destination) {
                     const travelTime = calculateTravelTime(
+                        person,
                         person.currentLocation,
                         destination.coordinate
                     );
