@@ -9,18 +9,18 @@ export const johnSchedule: ScheduleEntry[] = [
     },
     {
         startHour: 7,
-        endHour: 8,
+        endHour: 7.5,
         activity: "waking",
         locationType: "home"
     },
     {
-        startHour: 8,
-        endHour: 8.5,
+        startHour: 7.5,
+        endHour: 8,
         activity: "travelling",
         locationType: "work"
     },
     {
-        startHour: 8.5,
+        startHour: 8,
         endHour: 12,
         activity: "working",
         locationType: "work"

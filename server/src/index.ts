@@ -15,7 +15,7 @@ const world = createWorld();
 
 const simulation = new Simulation(
     world,
-    new Date("2026-09-18T06:00:00")
+    new Date("2026-09-18T06:00:00+01:00")
 );
 const runner = new SimulationRunner(simulation);
 

@@ -21,7 +21,7 @@ export class Simulation {
 
     update(realDeltaSeconds: number): void {
         const simulationDeltaSeconds =
-            realDeltaSeconds * 60 * this.speed;
+            realDeltaSeconds * this.speed; // real life second = 1 second in simulation time * speed multiplier
 
         this.simulationTime = new Date(
             this.simulationTime.getTime() +
