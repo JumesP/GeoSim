@@ -1,21 +1,25 @@
-import type { Person, WorldLocation } from "./types.js";
+import type { Person } from "../person/Person.js";
+import type { WorldLocation } from "./types.js";
+import type { ScheduleLocation } from "./schedule.js";
 
 export function getPersonLocation(
     person: Person,
     locations: WorldLocation[],
-    relationship: "home" | "work"
+    destination: ScheduleLocation
 ): WorldLocation | undefined {
-    const personLocation = person.locations.find(
+    const personLocations = person.locations.filter(
         location =>
-            location.relationship === relationship
+            location.relationship === destination.relationship
     );
 
-    if (!personLocation) {
-        return undefined;
-    }
-
-    return locations.find(
-        location =>
-            location.id === personLocation.locationId
+    return locations.find(location =>
+        personLocations.some(
+            personLocation =>
+                personLocation.locationId === location.id &&
+                (
+                    !("type" in destination) ||
+                    location.type === destination.type
+                )
+        )
     );
 }

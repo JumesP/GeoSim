@@ -1,52 +1,86 @@
-import type { ScheduleEntry } from "../schedule.js";
+import { ScheduleEntry } from "../schedule.js";
 
 export const johnSchedule: ScheduleEntry[] = [
     {
         startHour: 0,
         endHour: 7,
         activity: "sleeping",
-        locationType: "home"
+        location: {
+            relationship: "home"
+        }
     },
     {
         startHour: 7,
         endHour: 7.5,
         activity: "waking",
-        locationType: "home"
+        location: {
+            relationship: "home"
+        }
     },
     {
         startHour: 7.5,
         endHour: 8,
         activity: "travelling",
-        locationType: "work"
+        location: {
+            relationship: "work"
+        }
     },
     {
         startHour: 8,
         endHour: 12,
         activity: "working",
-        locationType: "work"
+        location: {
+            relationship: "work"
+        }
     },
     {
         startHour: 12,
         endHour: 13,
         activity: "lunch",
-        locationType: "work"
+        location: {
+            relationship: "work"
+        }
     },
     {
         startHour: 13,
         endHour: 17,
         activity: "working",
-        locationType: "work"
+        location: {
+            relationship: "work"
+        }
     },
     {
         startHour: 17,
         endHour: 17.5,
         activity: "travelling",
-        locationType: "home"
+        location: {
+            relationship: "home"
+        }
     },
     {
         startHour: 17.5,
-        endHour: 23,
+        endHour: 19,
+        activity: "shopping",
+        location: {
+            relationship: "regular",
+            type: "shop"
+        }
+    },
+    {
+        startHour: 19,
+        endHour: 21,
+        activity: "socialising",
+        location: {
+            relationship: "favourite",
+            type: "restaurant"
+        }
+    },
+    {
+        startHour: 21,
+        endHour: 24,
         activity: "at_home",
-        locationType: "home"
+        location: {
+            relationship: "home"
+        }
     }
 ];

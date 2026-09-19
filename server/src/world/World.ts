@@ -1,4 +1,5 @@
-import type { Person, WorldLocation } from "./types.js";
+import type { WorldLocation } from "./types.js";
+import type { Person } from "../person/Person.js";
 
 export class World {
     private people: Person[] = [];
@@ -26,5 +27,28 @@ export class World {
 
     getLocation(id: string): WorldLocation | undefined {
         return this.locations.find(location => location.id === id);
+    }
+
+    getRequiredLocation(id: string): WorldLocation {
+        const location = this.getLocation(id);
+
+        if (!location) {
+            throw new Error(
+                `World location "${id}" not found`
+            );
+        }
+
+        return location;
+    }
+
+    addGeneratedPerson(
+        person: Person,
+        locations: WorldLocation[]
+    ): void {
+        this.addPerson(person);
+
+        for (const location of locations) {
+            this.addLocation(location);
+        }
     }
 }

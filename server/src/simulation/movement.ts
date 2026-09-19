@@ -1,29 +1,10 @@
-import type { Coordinate, Person } from "../world/types.js";
-
-export function startMovement(
-    person: Person,
-    destination: Coordinate,
-    departureTime: Date,
-    durationMinutes: number
-): void {
-    person.movement = {
-        origin: { ...person.currentLocation },
-        destination: { ...destination },
-        departureTime: new Date(departureTime),
-        arrivalTime: new Date(
-            departureTime.getTime() +
-            durationMinutes * 60 * 1000
-        )
-    };
-}
+import type { Person } from "../person/Person.js";
 
 export function updateMovement(
     person: Person,
     currentTime: Date
 ): void {
-    if (!person.movement) {
-        return;
-    }
+    if (!person.movement) return;
 
     const movement = person.movement;
 
@@ -40,7 +21,7 @@ export function updateMovement(
         1
     );
 
-    person.currentLocation = {
+    person.updateLocation({
         latitude:
             movement.origin.latitude +
             (movement.destination.latitude -
@@ -50,13 +31,15 @@ export function updateMovement(
             movement.origin.longitude +
             (movement.destination.longitude -
                 movement.origin.longitude) * progress
-    };
+    });
 
     if (progress >= 1) {
-        person.currentLocation = {
-            ...movement.destination
-        };
+        const destination = person.finishMovement();
 
-        person.movement = null;
+        if (destination) {
+            console.log(
+                `${person.name} arrived at destination`
+            );
+        }
     }
 }

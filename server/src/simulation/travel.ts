@@ -1,4 +1,5 @@
-import type { Coordinate, Person } from "../world/types.js";
+import type { Coordinate } from "../world/types.js";
+import type { Person } from "../person/Person.js";
 
 const averageWalkingSpeed = 1.4;
 const averageCyclingSpeed = 4.1;

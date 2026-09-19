@@ -1,11 +1,11 @@
 import { World } from "../world/World.js";
 import { getCurrentScheduleEntry } from "./getCurrentScheduleEntry.js";
 import {
-    startMovement,
     updateMovement
 } from "./movement.js";
-import { calculateTravelTime } from "./travel.js";
-import { getPersonLocation } from "../world/getPersonLocation.js";
+import type { ScheduleActivity } from "../world/schedule.js";
+import type { PersonStatus } from "../person/Person.js";
+import { decideTravel } from "./behaviour.js";
 
 export type SimulationSpeed = 0 | 0.1 | 0.5 | 1 | 2 | 5 | 10 | 60;
 
@@ -39,41 +39,47 @@ export class Simulation {
                 continue;
             }
 
-            person.status = this.mapActivityToStatus(
-                scheduleEntry.activity
+            if (!person.movement) {
+                person.setStatus(
+                    this.mapActivityToStatus(
+                        scheduleEntry.activity
+                    )
+                );
+            }
+
+            const travelDecision = decideTravel(
+                person,
+                this.world,
+                this.simulationTime
             );
 
-            if (
-                scheduleEntry.activity === "travelling" &&
-                !person.movement
-            ) {
-                const relationship =
-                    scheduleEntry.locationType === "work"
-                        ? "work"
-                        : "home";
+            if (travelDecision) {
+                console.log({
+                    person: person.name,
+                    time: this.simulationTime.toISOString(),
+                    destinationId: travelDecision.destinationId,
+                    travelTimeMinutes:
+                        travelDecision.travelTimeMinutes,
+                    departureTime:
+                        travelDecision.departureTime.toISOString(),
+                    movement: person.movement
+                });
+            }
 
-                const destination = getPersonLocation(
-                    person,
-                    this.world.getLocations(),
-                    relationship
+            if (travelDecision) {
+                const destination =
+                    this.world.getRequiredLocation(
+                        travelDecision.destinationId
+                    );
+
+                person.startMovement(
+                    destination.coordinate,
+                    this.simulationTime,
+                    travelDecision.travelTimeMinutes
                 );
 
-                if (destination) {
-                    const travelTime = calculateTravelTime(
-                        person,
-                        person.currentLocation,
-                        destination.coordinate
-                    );
-
-                    startMovement(
-                        person,
-                        destination.coordinate,
-                        this.simulationTime,
-                        travelTime
-                    );
-
-                    person.destinationId = destination.id;
-                }
+                person.setDestination(destination.id);
+                person.setStatus("travelling");
             }
 
             updateMovement(
@@ -84,8 +90,8 @@ export class Simulation {
     }
 
     private mapActivityToStatus(
-        activity: string
-    ) {
+        activity: ScheduleActivity
+    ): PersonStatus {
         switch (activity) {
             case "sleeping":
                 return "sleeping";
@@ -99,13 +105,19 @@ export class Simulation {
             case "lunch":
                 return "eating";
 
+            case "shopping":
+                return "shopping";
+
+            case "exercising":
+                return "exercising";
+
+            case "socialising":
+                return "socialising";
+
             case "travelling":
                 return "travelling";
 
             case "at_home":
-                return "at_home";
-
-            default:
                 return "at_home";
         }
     }
