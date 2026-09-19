@@ -5,6 +5,7 @@ import {
     updateMovement
 } from "./movement.js";
 import { calculateTravelTime } from "./travel.js";
+import { getPersonLocation } from "../world/getPersonLocation.js";
 
 export type SimulationSpeed = 0 | 0.1 | 0.5 | 1 | 2 | 5 | 10 | 60;
 
@@ -46,10 +47,16 @@ export class Simulation {
                 scheduleEntry.activity === "travelling" &&
                 !person.movement
             ) {
-                const destination =
+                const relationship =
                     scheduleEntry.locationType === "work"
-                        ? this.world.getLocation(person.workplaceId)
-                        : this.world.getLocation(person.homeId);
+                        ? "work"
+                        : "home";
+
+                const destination = getPersonLocation(
+                    person,
+                    this.world.getLocations(),
+                    relationship
+                );
 
                 if (destination) {
                     const travelTime = calculateTravelTime(

@@ -31,8 +31,16 @@ export function createPerson(
         age,
         profilePicture: "https://i.pravatar.cc/100?img=12",
 
-        homeId: home.id,
-        workplaceId: workplace.id,
+        locations: [
+            {
+                locationId: home.id,
+                relationship: "home"
+            },
+            {
+                locationId: workplace.id,
+                relationship: "work"
+            }
+        ],
 
         currentLocation: home.coordinate,
 

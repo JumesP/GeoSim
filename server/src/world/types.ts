@@ -38,8 +38,7 @@ export type Person = {
     age: number;
     profilePicture: string;
 
-    homeId: string;
-    workplaceId: string;
+    locations: PersonLocation[];
 
     currentLocation: Coordinate;
 
@@ -69,3 +68,12 @@ export type TravelMode =
     | "walking"
     | "cycling"
     | "driving";
+
+export type PersonLocation = {
+    locationId: string;
+    relationship:
+        | "home"
+        | "work"
+        | "favourite"
+        | "regular";
+};

@@ -6,23 +6,36 @@ import "maplibre-gl/dist/maplibre-gl.css";
 type WorldLocation = {
     id: string;
     name: string;
-    type: string;
+    type: "home" | "work" | "shop" | "restaurant" | "park" | "gym" | "school";
     coordinate: {
         latitude: number;
         longitude: number;
     };
 };
 
+type PersonLocation = {
+    locationId: string;
+    relationship:
+        | "home"
+        | "work"
+        | "favourite"
+        | "regular";
+};
+
 type Person = {
     id: string;
     name: string;
     age: number;
+    profilePicture?: string;
+
     currentLocation: {
         latitude: number;
         longitude: number;
     };
+
     status: string;
-    profilePicture?: string;
+
+    locations: PersonLocation[];
 };
 
 type World = {
@@ -32,13 +45,62 @@ type World = {
     locations: WorldLocation[];
 };
 
+function getLocationIcon(
+    relationship: PersonLocation["relationship"],
+    type: WorldLocation["type"]
+): string {
+    switch (relationship) {
+        case "home":
+            return "🏠";
+
+        case "work":
+            return "💼";
+
+        case "favourite":
+            if (type === "shop") return "☕";
+            if (type === "restaurant") return "🍴";
+            if (type === "park") return "🌳";
+            if (type === "gym") return "🏋️";
+
+            return "⭐";
+
+        case "regular":
+            return "📍";
+
+        default:
+            return "📍";
+    }
+}
+
 export default function GeoMap() {
+    const [selectedPersonId, setSelectedPersonId] = useState<string | null>(null);
     const [simulationSpeed, setSimulationSpeed] = useState<number>(1);
     const [simulationTime, setSimulationTime] = useState<Date | null>(null);
+    const [world, setWorld] = useState<World | null>(null);
     const personMarkers = useRef<Map<string, maplibregl.Marker>>(new Map());
     const locationMarkers = useRef<Map<string, maplibregl.Marker>>(new Map());
     const mapContainer = useRef<HTMLDivElement>(null);
     const map = useRef<maplibregl.Map | null>(null);
+
+    const selectPerson = (person: Person) => {
+        const isSelected =
+            selectedPersonId === person.id;
+
+        setSelectedPersonId(
+            isSelected ? null : person.id
+        );
+
+        if (!isSelected && map.current) {
+            map.current.flyTo({
+                center: [
+                    person.currentLocation.longitude,
+                    person.currentLocation.latitude
+                ],
+                zoom: 15,
+                duration: 800
+            });
+        }
+    };
 
     useEffect(() => {
         if (!mapContainer.current || map.current) {
@@ -80,42 +142,13 @@ export default function GeoMap() {
 
                 const world: World = await response.json();
 
+                setWorld(world);
                 setSimulationTime(new Date(world.time));
                 setSimulationSpeed(world.speed);
 
                 if (!map.current) {
                     return;
                 }
-
-
-                /*
-                * LOCATIONS
-                */
-                for (const location of world.locations) {
-                    if (locationMarkers.current.has(location.id)) {
-                        continue;
-                    }
-
-                    const marker = new maplibregl.Marker()
-                        .setLngLat([
-                            location.coordinate.longitude,
-                            location.coordinate.latitude
-                        ])
-                        .setPopup(
-                            new maplibregl.Popup().setHTML(`
-                                <strong>${location.name}</strong>
-                                <br />
-                                ${location.type}
-                            `)
-                        )
-                        .addTo(map.current);
-
-                    locationMarkers.current.set(
-                        location.id,
-                        marker
-                    );
-                }
-
 
                 /*
                 * PEOPLE
@@ -126,84 +159,28 @@ export default function GeoMap() {
                     if (!marker) {
                         const element = document.createElement("div");
 
-                        // First person is currently treated as the user
-                        const isUser = person.id === world.people[0].id;
+                        element.innerHTML = `
+                            <div class="person-marker">
+                                <div class="person-marker-pulse"></div>
 
-                        if (isUser) {
-                            element.innerHTML = `
-                                <div style="
-                                    position: relative;
-                                    width: 60px;
-                                    height: 60px;
-                                    display: flex;
-                                    align-items: center;
-                                    justify-content: center;
-                                ">
-                                    <!-- Pulsing location ring -->
-                                    <div style="
-                                        position: absolute;
-                                        width: 60px;
-                                        height: 60px;
-                                        border-radius: 50%;
-                                        background: rgba(59, 130, 246, 0.18);
-                                        animation: geosim-pulse 2s ease-out infinite;
-                                    "></div>
-
-                                    <!-- Profile picture -->
-                                    <div style="
-                                        position: relative;
-                                        width: 42px;
-                                        height: 42px;
-                                        border-radius: 50%;
-                                        border: 3px solid white;
-                                        background: #3b82f6;
-                                        overflow: hidden;
-                                        box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-                                        z-index: 2;
-                                    ">
-                                        ${
-                                            person.profilePicture
-                                                ? `
-                                                    <img
-                                                        src="${person.profilePicture}"
-                                                        alt="${person.name}"
-                                                        style="
-                                                            width: 100%;
-                                                            height: 100%;
-                                                            object-fit: cover;
-                                                        "
-                                                    />
-                                                `
-                                                : `
-                                                    <div style="
-                                                        width: 100%;
-                                                        height: 100%;
-                                                        display: flex;
-                                                        align-items: center;
-                                                        justify-content: center;
-                                                        color: white;
-                                                        font-weight: bold;
-                                                        font-size: 18px;
-                                                    ">
-                                                        ${person.name.charAt(0)}
-                                                    </div>
-                                                `
-                                        }
-                                    </div>
+                                <div class="person-marker-image">
+                                    ${
+                                        person.profilePicture
+                                            ? `
+                                                <img
+                                                    src="${person.profilePicture}"
+                                                    alt="${person.name}"
+                                                />
+                                            `
+                                            : `
+                                                <div class="person-marker-initial">
+                                                    ${person.name.charAt(0)}
+                                                </div>
+                                            `
+                                    }
                                 </div>
-                            `;
-                        } else {
-                            element.innerHTML = `
-                                <div style="
-                                    width: 32px;
-                                    height: 32px;
-                                    border-radius: 50%;
-                                    background: #ef4444;
-                                    border: 3px solid white;
-                                    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-                                "></div>
-                            `;
-                        }
+                            </div>
+                        `;
 
                         marker = new maplibregl.Marker({
                             element
@@ -220,6 +197,10 @@ export default function GeoMap() {
                                 `)
                             )
                             .addTo(map.current);
+
+                        element.addEventListener("click", () => {
+                            selectPerson(person);
+                        });
 
                         personMarkers.current.set(
                             person.id,
@@ -297,8 +278,119 @@ export default function GeoMap() {
         };
     }, []);
 
+    useEffect(() => {
+        if (!map.current || !world) {
+            return;
+        }
+
+        const selectedPerson = world.people.find(
+            person => person.id === selectedPersonId
+        );
+
+        const selectedLocationIds = new Set(
+            selectedPerson?.locations.map(
+                location => location.locationId
+            ) ?? []
+        );
+
+        for (const location of world.locations) {
+            const shouldShow =
+                selectedLocationIds.has(location.id);
+
+            const existingMarker =
+                locationMarkers.current.get(location.id);
+
+            // Find this person's relationship with this location
+            const personLocation =
+                selectedPerson?.locations.find(
+                    personLocation =>
+                        personLocation.locationId === location.id
+                );
+
+            // Show selected person's location
+            if (shouldShow && !existingMarker) {
+                const element = document.createElement("div");
+
+                const icon = getLocationIcon(
+                    personLocation?.relationship ?? "regular",
+                    location.type
+                );
+
+                element.innerHTML = `
+                    <div class="location-marker">
+                        <div class="location-marker-icon">
+                            ${icon}
+                        </div>
+
+                        <div class="location-marker-label">
+                            ${location.name}
+                        </div>
+                    </div>
+                `;
+
+                const marker = new maplibregl.Marker({
+                    element,
+                    anchor: "bottom"
+                })
+                    .setLngLat([
+                        location.coordinate.longitude,
+                        location.coordinate.latitude
+                    ])
+                    .setPopup(
+                        new maplibregl.Popup().setHTML(`
+                            <strong>${location.name}</strong>
+                            <br />
+                            ${location.type}
+                        `)
+                    )
+                    .addTo(map.current);
+
+                locationMarkers.current.set(
+                    location.id,
+                    marker
+                );
+            }
+
+            // Hide locations belonging to previous selection
+            if (!shouldShow && existingMarker) {
+                existingMarker.remove();
+
+                locationMarkers.current.delete(
+                    location.id
+                );
+            }
+        }
+    }, [selectedPersonId, world]);
+
+    useEffect(() => {
+        for (const person of world?.people ?? []) {
+            const marker =
+                personMarkers.current.get(person.id);
+
+            if (!marker) {
+                continue;
+            }
+
+            const markerContent =
+                marker
+                    .getElement()
+                    .querySelector(".person-marker");
+
+            if (!markerContent) {
+                continue;
+            }
+
+            markerContent.classList.toggle(
+                "selected",
+                person.id === selectedPersonId
+            );
+        }
+    }, [selectedPersonId, world]);
+
     return (
         <div className="relative w-full h-150 rounded-2xl overflow-hidden">
+
+            {/* Simulation Time */}
             <div className="absolute top-4 left-4 z-10 bg-black/75 text-white px-4 py-2 rounded-xl backdrop-blur-sm">
                 <p className="text-xs text-gray-400">
                     Simulation Time
@@ -319,10 +411,146 @@ export default function GeoMap() {
                 </p>
             </div>
 
+
+            {/* People Sidebar */}
+            <div className="
+                absolute
+                top-4
+                right-4
+                z-10
+                w-72
+                max-h-[calc(100%-2rem)]
+                overflow-hidden
+                rounded-2xl
+                border
+                border-white/10
+                bg-black/20
+                backdrop-blur-xl
+                shadow-2xl
+                text-white
+            ">
+
+                {/* Header */}
+                <div className="px-4 py-3 border-b border-white/10">
+                    <h2 className="text-lg font-semibold">
+                        People
+                    </h2>
+
+                    <p className="text-xs text-white/50">
+                        {world?.people.length ?? 0} people
+                    </p>
+                </div>
+
+
+                {/* People */}
+                <div className="max-h-150 overflow-y-auto">
+
+                    {world?.people.map((person) => (
+                        <button
+                            key={person.id}
+                            type="button"
+                            className={`
+                                w-full
+                                flex
+                                items-center
+                                gap-3
+                                px-4
+                                py-3
+                                text-left
+                                transition
+                                ${selectedPersonId === person.id
+                                    ? "bg-white/15"
+                                    : "hover:bg-white/10"
+                                }
+                            `}
+                            onClick={() => selectPerson(person)}
+                        >
+
+                            {/* Profile Picture */}
+                            <div className="
+                                w-10
+                                h-10
+                                shrink-0
+                                overflow-hidden
+                                rounded-full
+                                border-2
+                                border-white/80
+                                bg-blue-500
+                            ">
+                                {person.profilePicture ? (
+                                    <img
+                                        src={person.profilePicture}
+                                        alt={person.name}
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    <div className="
+                                        w-full
+                                        h-full
+                                        flex
+                                        items-center
+                                        justify-center
+                                        font-semibold
+                                    ">
+                                        {person.name.charAt(0)}
+                                    </div>
+                                )}
+                            </div>
+
+
+                            {/* Person Info */}
+                            <div className="min-w-0 flex-1">
+
+                                <p className="font-medium truncate">
+                                    {person.name}
+                                </p>
+
+                                <div className="flex items-center gap-2">
+
+                                    <span className="
+                                        w-2
+                                        h-2
+                                        rounded-full
+                                        bg-green-400
+                                        shrink-0
+                                    " />
+
+                                    <p className="
+                                        text-sm
+                                        text-white/60
+                                        capitalize
+                                        truncate
+                                    ">
+                                        {person.status.replace("_", " ")}
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+
+                            {/* Arrow */}
+                            <span className="
+                                text-white/40
+                                text-xl
+                            ">
+                                ›
+                            </span>
+
+                        </button>
+                    ))}
+
+                </div>
+
+            </div>
+
+
+            {/* Map */}
             <div
                 ref={mapContainer}
-                className="w-full h-full"
+                className="relative z-0 w-full h-full"
             />
+
         </div>
     );
 }
