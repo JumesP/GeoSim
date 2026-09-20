@@ -5,6 +5,8 @@ import { Simulation } from "./simulation/Simulation.js";
 import { SimulationRunner } from "./simulation/SimulationRunner.js";
 import { createWorld } from "./world/createWorld.js";
 import { generateDailyPlan } from "./planning/generateDailyPlan.js";
+import { generateSequentialPlan } from "./planning/generateSequentialPlan.js";
+import { World } from "./world/World.js";
 
 const app = express();
 const PORT = 3002;
@@ -90,7 +92,7 @@ app.get("/api/people/:name/plan", (req, res) => {
     }
 
     const plan =
-        generateDailyPlan(person, date);
+        generateSequentialPlan(person, world, date);
 
     res.json({
         person: {

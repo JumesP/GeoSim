@@ -1,5 +1,6 @@
 import type { DailyPlan } from "./DailyPlan.js";
 import { activityAlternatives } from "./activityAlternatives.js";
+import { chooseWeighted } from "./weightedChoice.js";
 
 export function applyDailyPlanDecisions(
     plan: DailyPlan
@@ -22,12 +23,16 @@ export function applyDailyPlanDecisions(
             return entry;
         }
 
-        const alternative =
-            alternatives[
-                Math.floor(
-                    Math.random() * alternatives.length
-                )
-            ];
+        const alternative = chooseWeighted(
+            alternatives.map(option => ({
+                value: option,
+                weight: option.weight
+            }))
+        );
+
+        if (!alternative) {
+            return entry;
+        }
 
         return {
             startHour: entry.startHour,

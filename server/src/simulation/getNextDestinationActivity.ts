@@ -1,21 +1,21 @@
 import type { Person } from "../person/Person.js";
 import type { World } from "../world/World.js";
-import type { ScheduleEntry } from "../world/schedule.js";
+import type { SequentialPlanEntry } from "../planning/generateSequentialPlan.js";
 import { getPersonLocation } from "../world/getPersonLocation.js";
-import { getCurrentScheduleEntry } from "./getCurrentScheduleEntry.js";
+import { getCurrentSequentialPlanEntry } from "./getCurrentSequentialPlanEntry.js";
 
 export function getNextDestinationActivity(
     person: Person,
     world: World,
-    schedule: ScheduleEntry[],
+    schedule: SequentialPlanEntry[],
     currentTime: Date
 ): {
-    entry: ScheduleEntry;
+    entry: SequentialPlanEntry;
     destinationId: string;
 } | null {
     {
         const currentEntry =
-            getCurrentScheduleEntry(
+            getCurrentSequentialPlanEntry(
                 schedule,
                 currentTime
             );

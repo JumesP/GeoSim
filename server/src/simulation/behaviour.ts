@@ -3,12 +3,12 @@ import type { World } from "../world/World.js";
 import { getNextDestinationActivity } from "./getNextDestinationActivity.js";
 import { getDepartureTime } from "./getDepartureTime.js";
 import { calculateTravelTime } from "./travel.js";
-import { ScheduleEntry } from "../world/schedule.js";
+import type { SequentialPlanEntry } from "../planning/generateSequentialPlan.js";
 
 export function decideTravel(
     person: Person,
     world: World,
-    schedule: ScheduleEntry[],
+    schedule: SequentialPlanEntry[],
     currentTime: Date
 ): {
     destinationId: string;

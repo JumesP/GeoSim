@@ -6,6 +6,7 @@ import type {
 export type ActivityAlternative = {
     activity: ScheduleActivity;
     location: ScheduleLocation;
+    weight: number;
 };
 
 export const activityAlternatives:
@@ -18,14 +19,16 @@ export const activityAlternatives:
             activity: "at_home",
             location: {
                 relationship: "home"
-            }
+            },
+            weight: 60
         },
         {
             activity: "exercising",
             location: {
                 relationship: "regular",
                 type: "park"
-            }
+            },
+            weight: 40
         }
     ],
 
@@ -34,7 +37,8 @@ export const activityAlternatives:
             activity: "at_home",
             location: {
                 relationship: "home"
-            }
+            },
+            weight: 100
         }
     ]
 };

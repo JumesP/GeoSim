@@ -8,6 +8,12 @@ import type { Person, PersonStatus } from "../person/Person.js";
 import { decideTravel } from "./behaviour.js";
 import { generateDailyPlan } from "../planning/generateDailyPlan.js";
 import type { DailyPlan } from "../planning/DailyPlan.js";
+import {
+    generateSequentialPlan,
+    SequentialPlan,
+    type SequentialPlanEntry
+} from "../planning/generateSequentialPlan.js";
+import { getCurrentSequentialPlanEntry } from "./getCurrentSequentialPlanEntry.js";
 
 export type SimulationSpeed = 0 | 0.1 | 0.5 | 1 | 2 | 5 | 10 | 60;
 
@@ -32,21 +38,24 @@ export class Simulation {
         );
 
         for (const person of this.world.getPeople()) {
-            const dailyPlan = this.getDailyPlan(person);
 
-            const scheduleEntry = getCurrentScheduleEntry(
-                dailyPlan.entries,
-                this.simulationTime
-            );
+            const sequentialPlan =
+                this.getSequentialPlan(person);
 
-            if (!scheduleEntry) {
+            const currentEntry =
+                getCurrentSequentialPlanEntry(
+                    sequentialPlan.entries,
+                    this.simulationTime
+                );
+
+            if (!currentEntry) {
                 continue;
             }
 
             if (!person.movement) {
                 person.setStatus(
                     this.mapActivityToStatus(
-                        scheduleEntry.activity
+                        currentEntry.activity
                     )
                 );
             }
@@ -54,7 +63,7 @@ export class Simulation {
             const travelDecision = decideTravel(
                 person,
                 this.world,
-                dailyPlan.entries,
+                sequentialPlan.entries,
                 this.simulationTime
             );
 
@@ -62,7 +71,8 @@ export class Simulation {
                 console.log({
                     person: person.name,
                     time: this.simulationTime.toISOString(),
-                    destinationId: travelDecision.destinationId,
+                    destinationId:
+                        travelDecision.destinationId,
                     travelTimeMinutes:
                         travelDecision.travelTimeMinutes,
                     departureTime:
@@ -83,7 +93,10 @@ export class Simulation {
                     travelDecision.travelTimeMinutes
                 );
 
-                person.setDestination(destination.id);
+                person.setDestination(
+                    destination.id
+                );
+
                 person.setStatus("travelling");
             }
 
@@ -131,6 +144,14 @@ export class Simulation {
         string,
         DailyPlan
     >();
+
+    private sequentialPlans =
+        new Map<
+            string,
+            SequentialPlan & {
+                lastActivity: ScheduleActivity | null;
+            }
+        >();
 
     getTime(): Date {
         return new Date(this.simulationTime);
@@ -180,5 +201,46 @@ export class Simulation {
         );
 
         return plan;
+    }
+
+    private getSequentialPlan(
+        person: Person
+    ): SequentialPlan & {
+        lastActivity: ScheduleActivity | null;
+    } {
+        const date =
+            this.simulationTime
+                .toISOString()
+                .slice(0, 10);
+
+        const existing =
+            this.sequentialPlans.get(person.id);
+
+        if (
+            existing &&
+            existing.date.toISOString().slice(0, 10) === date
+        ) {
+            return existing;
+        }
+
+        const plan =
+            generateSequentialPlan(
+                person,
+                this.world,
+                this.simulationTime
+            );
+
+        const planWithLastActivity = {
+            ...plan,
+            lastActivity:
+                plan.entries.at(-1)?.activity ?? null
+        };
+
+        this.sequentialPlans.set(
+            person.id,
+            planWithLastActivity
+        );
+
+        return planWithLastActivity;
     }
 }
