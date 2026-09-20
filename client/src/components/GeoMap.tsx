@@ -22,12 +22,41 @@ type PersonLocation = {
         | "regular";
 };
 
+type ScheduleEntry = {
+    id: string;
+    name: string;
+    startHour: number;
+    endHour: number;
+    activity:
+        | "sleeping"
+        | "waking"
+        | "at_home"
+        | "working"
+        | "eating"
+        | "shopping"
+        | "exercising"
+        | "socialising"
+        | "travelling";
+    location: {
+        relationship:
+            | "home"
+            | "work"
+            | "favourite"
+            | "regular";
+        type?:
+            | "shop"
+            | "restaurant"
+            | "park"
+            | "gym";
+    };
+};
+
 type Person = {
     id: string;
     name: string;
     age: number;
     profilePicture?: string;
-
+    schedule: ScheduleEntry[];
     currentLocation: {
         latitude: number;
         longitude: number;
@@ -36,6 +65,7 @@ type Person = {
     status: string;
 
     locations: PersonLocation[];
+
 };
 
 type World = {
@@ -388,169 +418,189 @@ export default function GeoMap() {
     }, [selectedPersonId, world]);
 
     return (
-        <div className="relative w-full h-150 rounded-2xl overflow-hidden">
+        <>
+            <div className="relative w-full h-150 rounded-2xl overflow-hidden">
 
-            {/* Simulation Time */}
-            <div className="absolute top-4 left-4 z-10 bg-black/75 text-white px-4 py-2 rounded-xl backdrop-blur-sm">
-                <p className="text-xs text-gray-400">
-                    Simulation Time
-                </p>
+                {/* Simulation Time */}
+                <div className="absolute top-4 left-4 z-10 bg-black/75 text-white px-4 py-2 rounded-xl backdrop-blur-sm">
+                    <p className="text-xs text-gray-400">
+                        Simulation Time
+                    </p>
 
-                <p className="text-2xl font-mono font-bold">
-                    {simulationTime
-                        ? simulationTime.toLocaleTimeString(
-                            "en-GB",
-                            {
-                                timeZone: "Europe/London",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                                second: "2-digit"
-                            }
-                        )
-                        : "--:--:--"}
-                </p>
-            </div>
-
-
-            {/* People Sidebar */}
-            <div className="
-                absolute
-                top-4
-                right-4
-                z-10
-                w-72
-                max-h-[calc(100%-2rem)]
-                overflow-hidden
-                rounded-2xl
-                border
-                border-white/10
-                bg-black/20
-                backdrop-blur-xl
-                shadow-2xl
-                text-white
-            ">
-
-                {/* Header */}
-                <div className="px-4 py-3 border-b border-white/10">
-                    <h2 className="text-lg font-semibold">
-                        People
-                    </h2>
-
-                    <p className="text-xs text-white/50">
-                        {world?.people.length ?? 0} people
+                    <p className="text-2xl font-mono font-bold">
+                        {simulationTime
+                            ? simulationTime.toLocaleTimeString(
+                                "en-GB",
+                                {
+                                    timeZone: "Europe/London",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                    second: "2-digit"
+                                }
+                            )
+                            : "--:--:--"}
                     </p>
                 </div>
 
 
-                {/* People */}
-                <div className="max-h-150 overflow-y-auto">
+                {/* People Sidebar */}
+                <div className="
+                    absolute
+                    top-4
+                    right-4
+                    z-10
+                    w-72
+                    max-h-[calc(100%-2rem)]
+                    overflow-hidden
+                    rounded-2xl
+                    border
+                    border-white/10
+                    bg-black/20
+                    backdrop-blur-xl
+                    shadow-2xl
+                    text-white
+                ">
 
-                    {world?.people.map((person) => (
-                        <button
-                            key={person.id}
-                            type="button"
-                            className={`
-                                w-full
-                                flex
-                                items-center
-                                gap-3
-                                px-4
-                                py-3
-                                text-left
-                                transition
-                                ${selectedPersonId === person.id
-                                    ? "bg-white/15"
-                                    : "hover:bg-white/10"
-                                }
-                            `}
-                            onClick={() => selectPerson(person)}
-                        >
+                    {/* Header */}
+                    <div className="px-4 py-3 border-b border-white/10">
+                        <h2 className="text-lg font-semibold">
+                            People
+                        </h2>
 
-                            {/* Profile Picture */}
-                            <div className="
-                                w-10
-                                h-10
-                                shrink-0
-                                overflow-hidden
-                                rounded-full
-                                border-2
-                                border-white/80
-                                bg-blue-500
-                            ">
-                                {person.profilePicture ? (
-                                    <img
-                                        src={person.profilePicture}
-                                        alt={person.name}
-                                        className="w-full h-full object-cover"
-                                    />
-                                ) : (
-                                    <div className="
-                                        w-full
-                                        h-full
-                                        flex
-                                        items-center
-                                        justify-center
-                                        font-semibold
-                                    ">
-                                        {person.name.charAt(0)}
-                                    </div>
-                                )}
-                            </div>
+                        <p className="text-xs text-white/50">
+                            {world?.people.length ?? 0} people
+                        </p>
+                    </div>
 
 
-                            {/* Person Info */}
-                            <div className="min-w-0 flex-1">
+                    {/* People */}
+                    <div className="max-h-150 overflow-y-auto">
 
-                                <p className="font-medium truncate">
-                                    {person.name}
-                                </p>
+                        {world?.people.map((person) => (
+                            <button
+                                key={person.id}
+                                type="button"
+                                className={`
+                                    w-full
+                                    flex
+                                    items-center
+                                    gap-3
+                                    px-4
+                                    py-3
+                                    text-left
+                                    transition
+                                    ${selectedPersonId === person.id
+                                        ? "bg-white/15"
+                                        : "hover:bg-white/10"
+                                    }
+                                `}
+                                onClick={() => selectPerson(person)}
+                            >
 
-                                <div className="flex items-center gap-2">
+                                {/* Profile Picture */}
+                                <div className="
+                                    w-10
+                                    h-10
+                                    shrink-0
+                                    overflow-hidden
+                                    rounded-full
+                                    border-2
+                                    border-white/80
+                                    bg-blue-500
+                                ">
+                                    {person.profilePicture ? (
+                                        <img
+                                            src={person.profilePicture}
+                                            alt={person.name}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    ) : (
+                                        <div className="
+                                            w-full
+                                            h-full
+                                            flex
+                                            items-center
+                                            justify-center
+                                            font-semibold
+                                        ">
+                                            {person.name.charAt(0)}
+                                        </div>
+                                    )}
+                                </div>
 
-                                    <span className="
-                                        w-2
-                                        h-2
-                                        rounded-full
-                                        bg-green-400
-                                        shrink-0
-                                    " />
 
-                                    <p className="
-                                        text-sm
-                                        text-white/60
-                                        capitalize
-                                        truncate
-                                    ">
-                                        {person.status.replace("_", " ")}
+                                {/* Person Info */}
+                                <div className="min-w-0 flex-1">
+
+                                    <p className="font-medium truncate">
+                                        {person.name}
                                     </p>
+
+                                    <div className="flex items-center gap-2">
+
+                                        <span className="
+                                            w-2
+                                            h-2
+                                            rounded-full
+                                            bg-green-400
+                                            shrink-0
+                                        " />
+
+                                        <p className="
+                                            text-sm
+                                            text-white/60
+                                            capitalize
+                                            truncate
+                                        ">
+                                            {person.status.replace("_", " ")}
+                                        </p>
+
+                                    </div>
 
                                 </div>
 
-                            </div>
 
+                                {/* Arrow */}
+                                <span className="
+                                    text-white/40
+                                    text-xl
+                                ">
+                                    ›
+                                </span>
 
-                            {/* Arrow */}
-                            <span className="
-                                text-white/40
-                                text-xl
-                            ">
-                                ›
-                            </span>
+                            </button>
+                        ))}
 
-                        </button>
-                    ))}
+                    </div>
 
                 </div>
 
+
+                {/* Map */}
+                <div
+                    ref={mapContainer}
+                    className="relative z-0 w-full h-full"
+                />
             </div>
 
-
-            {/* Map */}
-            <div
-                ref={mapContainer}
-                className="relative z-0 w-full h-full"
-            />
-
-        </div>
+            {/* Schedule visual aid */}
+            <div className="">
+                {world && world.people.map((person) => (
+                    <div key={person.id}>
+                        <p>{person.name}</p>
+                        {person.schedule.map((scheduleItem) => (
+                            <p className="text-sm text-white/60 border-gray-500 border-b-4 pl-2 w-fit" key={scheduleItem.id}>
+                                <p className="text-xs text-white/40">
+                                    {scheduleItem.startHour} - {scheduleItem.endHour}
+                                </p>
+                                <p className="text-sm text-white/60">
+                                    {scheduleItem.activity} at {scheduleItem.location.type ? scheduleItem.location.type : scheduleItem.location.relationship}
+                                </p>
+                            </p>
+                        ))}
+                    </div>
+                ))}
+            </div>
+            </>
     );
 }

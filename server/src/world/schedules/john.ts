@@ -48,7 +48,8 @@ export const johnSchedule: ScheduleEntry[] = [
         location: {
             relationship: "regular",
             type: "shop"
-        }
+        },
+        optional: true
     },
     {
         startHour: 19,
@@ -57,7 +58,8 @@ export const johnSchedule: ScheduleEntry[] = [
         location: {
             relationship: "favourite",
             type: "restaurant"
-        }
+        },
+        optional: true
     },
     {
         startHour: 21,

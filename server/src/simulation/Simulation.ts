@@ -4,8 +4,10 @@ import {
     updateMovement
 } from "./movement.js";
 import type { ScheduleActivity } from "../world/schedule.js";
-import type { PersonStatus } from "../person/Person.js";
+import type { Person, PersonStatus } from "../person/Person.js";
 import { decideTravel } from "./behaviour.js";
+import { generateDailyPlan } from "../planning/generateDailyPlan.js";
+import type { DailyPlan } from "../planning/DailyPlan.js";
 
 export type SimulationSpeed = 0 | 0.1 | 0.5 | 1 | 2 | 5 | 10 | 60;
 
@@ -30,8 +32,10 @@ export class Simulation {
         );
 
         for (const person of this.world.getPeople()) {
+            const dailyPlan = this.getDailyPlan(person);
+
             const scheduleEntry = getCurrentScheduleEntry(
-                person.schedule,
+                dailyPlan.entries,
                 this.simulationTime
             );
 
@@ -50,6 +54,7 @@ export class Simulation {
             const travelDecision = decideTravel(
                 person,
                 this.world,
+                dailyPlan.entries,
                 this.simulationTime
             );
 
@@ -122,6 +127,11 @@ export class Simulation {
         }
     }
 
+    private dailyPlans = new Map<
+        string,
+        DailyPlan
+    >();
+
     getTime(): Date {
         return new Date(this.simulationTime);
     }
@@ -136,5 +146,39 @@ export class Simulation {
 
     getWorld(): World {
         return this.world;
+    }
+
+    private getDailyPlan(
+        person: Person
+    ): DailyPlan {
+        const date = this.simulationTime;
+
+        const dateString =
+            new Intl.DateTimeFormat("en-CA", {
+                timeZone: "Europe/London",
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit"
+            }).format(date);
+
+        const existingPlan =
+            this.dailyPlans.get(person.id);
+
+        if (
+            existingPlan &&
+            existingPlan.date === dateString
+        ) {
+            return existingPlan;
+        }
+
+        const plan =
+            generateDailyPlan(person, date);
+
+        this.dailyPlans.set(
+            person.id,
+            plan
+        );
+
+        return plan;
     }
 }

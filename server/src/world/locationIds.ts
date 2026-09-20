@@ -2,5 +2,6 @@ export const LOCATION_IDS = {
     office: "office",
     tesco: "tesco",
     coffeeShop: "coffee-shop",
-    park: "park"
+    park: "park",
+    restaurant: "restaurant"
 } as const;

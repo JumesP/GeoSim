@@ -23,6 +23,14 @@ export function createJohn(
         LOCATION_IDS.tesco
     );
 
+    const restaurant = world.getRequiredLocation(
+        LOCATION_IDS.restaurant
+    );
+
+    const park = world.getRequiredLocation(
+        LOCATION_IDS.park
+    );
+
     const home = createLocation(
         "john-home",
         "John's Home",
@@ -44,6 +52,22 @@ export function createJohn(
             {
                 locationId: workplace.id,
                 relationship: "work"
+            },
+            {
+                locationId: coffeeShop.id,
+                relationship: "favourite"
+            },
+            {
+                locationId: tesco.id,
+                relationship: "regular"
+            },
+            {
+                locationId: restaurant.id,
+                relationship: "favourite"
+            },
+            {
+                locationId: park.id,
+                relationship: "regular"
             }
         ],
 
@@ -54,6 +78,6 @@ export function createJohn(
 
     return {
         person,
-        locations: [home, workplace, coffeeShop, tesco]
+        locations: [home, workplace, coffeeShop, tesco, restaurant]
     };
 }

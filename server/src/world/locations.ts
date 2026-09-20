@@ -14,18 +14,26 @@ export function createWorldLocations(): WorldLocation[] {
 
         createLocation(
             LOCATION_IDS.tesco,
-            "Tesco",
+            "Tesco Express Heelands",
             "shop",
-            52.0400,
-            -0.7580
+            52.0507315,
+            -0.7798389
         ),
 
         createLocation(
             LOCATION_IDS.coffeeShop,
-            "Coffee Shop",
+            "E’DO Coffee",
             "restaurant",
-            52.0410,
-            -0.7600
+            52.068644,
+            -0.777874
+        ),
+
+        createLocation(
+            LOCATION_IDS.restaurant,
+            "The Victoria Inn",
+            "restaurant",
+            52.048564,
+            -0.788697
         ),
 
         createLocation(
@@ -36,4 +44,4 @@ export function createWorldLocations(): WorldLocation[] {
             -0.7620
         )
     ];
-}
+};

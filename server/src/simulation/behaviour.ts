@@ -3,10 +3,12 @@ import type { World } from "../world/World.js";
 import { getNextDestinationActivity } from "./getNextDestinationActivity.js";
 import { getDepartureTime } from "./getDepartureTime.js";
 import { calculateTravelTime } from "./travel.js";
+import { ScheduleEntry } from "../world/schedule.js";
 
 export function decideTravel(
     person: Person,
     world: World,
+    schedule: ScheduleEntry[],
     currentTime: Date
 ): {
     destinationId: string;
@@ -20,6 +22,7 @@ export function decideTravel(
     const nextDestination = getNextDestinationActivity(
         person,
         world,
+        schedule,
         currentTime
     );
 

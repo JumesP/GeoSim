@@ -17,6 +17,7 @@ export type ScheduleEntry = {
     endHour: number;
     activity: ScheduleActivity;
     location: ScheduleLocation;
+    optional?: boolean;
 };
 
 export type ScheduleLocation =

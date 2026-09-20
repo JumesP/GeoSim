@@ -51,4 +51,12 @@ export class World {
             this.addLocation(location);
         }
     }
+
+    getPersonByName(name: string): Person | undefined {
+        return this.people.find(
+            person =>
+                person.name.toLowerCase() ===
+                name.toLowerCase()
+        );
+    }
 }
