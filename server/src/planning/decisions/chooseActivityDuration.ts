@@ -3,7 +3,8 @@ import { chooseWeighted } from "../weightedChoice.js";
 import { activityDurations } from "../data/activityDurations.js";
 
 export function chooseActivityDuration(
-    activity: ScheduleActivity
+    activity: ScheduleActivity,
+    maxMinutes?: number
 ): number | null {
     const options = activityDurations[activity];
 
@@ -11,8 +12,20 @@ export function chooseActivityDuration(
         return null;
     }
 
+    const availableOptions =
+        maxMinutes === undefined
+            ? options
+            : options.filter(
+                option =>
+                    option.minutes <= maxMinutes
+            );
+
+    if (availableOptions.length === 0) {
+        return null;
+    }
+
     return chooseWeighted(
-        options.map(option => ({
+        availableOptions.map(option => ({
             value: option.minutes,
             weight: option.weight
         }))

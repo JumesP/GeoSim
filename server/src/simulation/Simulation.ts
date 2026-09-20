@@ -4,7 +4,7 @@ import {
     updateMovement
 } from "./movement.js";
 import type { ScheduleActivity } from "../world/schedule.js";
-import type { Person, PersonStatus } from "../person/Person.js";
+import type { Person } from "../person/Person.js";
 import { decideTravel } from "./behaviour.js";
 import { generateDailyPlan } from "../planning/generateDailyPlan.js";
 import type { DailyPlan } from "../planning/DailyPlan.js";
@@ -109,7 +109,7 @@ export class Simulation {
 
     private mapActivityToStatus(
         activity: ScheduleActivity
-    ): PersonStatus {
+    ): ScheduleActivity {
         switch (activity) {
             case "sleeping":
                 return "sleeping";
@@ -121,7 +121,7 @@ export class Simulation {
                 return "working";
 
             case "lunch":
-                return "eating";
+                return "lunch";
 
             case "shopping":
                 return "shopping";
@@ -132,10 +132,12 @@ export class Simulation {
             case "socialising":
                 return "socialising";
 
-            case "travelling":
-                return "travelling";
+            case "waiting":
+                return "waiting";
 
             case "at_home":
+                return "at_home";
+            default:
                 return "at_home";
         }
     }

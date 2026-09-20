@@ -1,5 +1,6 @@
 import type { Coordinate } from "../world/types.js";
 import type { ScheduleEntry } from "../world/schedule.js";
+import type { ScheduleActivity, ScheduleLocation } from "../world/schedule.js";
 
 export type PersonLocation = {
     locationId: string;
@@ -9,17 +10,6 @@ export type PersonLocation = {
         | "favourite"
         | "regular";
 };
-
-export type PersonStatus =
-    | "sleeping"
-    | "waking"
-    | "at_home"
-    | "working"
-    | "eating"
-    | "shopping"
-    | "exercising"
-    | "socialising"
-    | "travelling";
 
 export type TravelMode =
     | "walking"
@@ -43,7 +33,7 @@ export class Person {
 
         public currentLocation: Coordinate,
 
-        public status: PersonStatus,
+        public status: ScheduleActivity,
 
         public destinationId: string | null,
 
@@ -62,7 +52,7 @@ export class Person {
         public readonly profilePicture?: string
     ) { }
 
-    setStatus(status: PersonStatus): void {
+    setStatus(status: ScheduleActivity): void {
         this.status = status;
     }
 

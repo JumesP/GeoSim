@@ -6,7 +6,11 @@ const world = createWorld();
 
 const { person } = createJohn(world);
 
-const date = new Date();
+const date = new Date(
+    2026,
+    8, // September
+    21
+);
 
 date.setHours(0, 0, 0, 0);
 

@@ -56,20 +56,20 @@ export function getAvailableActivities(
     }
 
     // Work
-    if (
-        work &&
-        currentHour >= 8 &&
-        currentHour < 18
-    ) {
-        options.push({
-            activity: "working",
-            location: {
-                relationship: "work"
-            },
-            locationId: work.locationId,
-            weight: 100
-        });
-    }
+    // if (
+    //     work &&
+    //     currentHour >= 8 &&
+    //     currentHour < 18
+    // ) {
+    //     options.push({
+    //         activity: "working",
+    //         location: {
+    //             relationship: "work"
+    //         },
+    //         locationId: work.locationId,
+    //         weight: 100
+    //     });
+    // }
 
     // Other known locations
     for (const personLocation of person.locations) {

@@ -40,8 +40,8 @@ export function createWorldLocations(): WorldLocation[] {
             LOCATION_IDS.park,
             "Park",
             "park",
-            52.0420,
-            -0.7620
+            52.0564,
+            -0.7662
         )
     ];
 };

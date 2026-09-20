@@ -1,4 +1,5 @@
 import type { ScheduleActivity } from "../../../world/schedule.js";
+import type { PersonCommitment } from "../../PersonCommitment.js";
 
 export type ActivityPreferences =
     Partial<Record<ScheduleActivity, number>>;
@@ -11,8 +12,7 @@ export type LocationPreferences =
         >
     >;
 
-export const johnLocationPreferences:
-    LocationPreferences = {
+export const johnLocationPreferences: LocationPreferences = {
     shopping: {
         "tesco-heelands": 80
     },
@@ -27,8 +27,7 @@ export const johnLocationPreferences:
     }
 };
 
-export const johnActivityPreferences:
-    ActivityPreferences = {
+export const johnActivityPreferences: ActivityPreferences = {
     sleeping: 100,
     waking: 100,
     working: 80,
@@ -37,3 +36,13 @@ export const johnActivityPreferences:
     socialising: 20,
     exercising: 10
 };
+
+export const johnCommitments: PersonCommitment[] = [
+    {
+        activity: "working",
+        locationId: "office",
+        startHour: 9,
+        endHour: 17,
+        daysOfWeek: [1, 2, 3, 4, 5]
+    }
+];

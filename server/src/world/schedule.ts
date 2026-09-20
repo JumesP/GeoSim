@@ -9,8 +9,9 @@ export type ScheduleActivity =
     | "shopping"
     | "exercising"
     | "socialising"
+    | "at_home"
+    | "waiting"
     | "travelling"
-    | "at_home";
 
 export type ScheduleEntry = {
     startHour: number;

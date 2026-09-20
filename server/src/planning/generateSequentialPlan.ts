@@ -14,13 +14,24 @@ import {
 } from "./data/people/john.js";
 import { createPlanTime } from "./decisions/createPlanTime.js";
 import { activityLimits } from "./data/activityLimits.js";
+import type { PlanPriority } from "./planPriority.js";
+import { getActivityPriority } from "./getActivityPriority.js";
+import { getConcreteScheduleItems } from "./getConcreteScheduleItems.js";
+import { johnCommitments } from "./data/people/john.js";
+import { getAvailableFlexibleMinutes } from "./getAvailableFlexibleMinutes.js";
+import { getLatestDepartureTime } from "./getLatestDepartureTime.js";
+import { createTravelPlanEntry } from "./createTravelPlanEntry.js";
+import { calculateTravelTime } from "../simulation/travel.js";
+import { getSlackMinutes } from "./getSlackMinutes.js";
+import { createWaitingPlanEntry } from "./createWaitingPlanEntry.js";
 
 export type SequentialPlanEntry = {
     startTime: Date;
     endTime: Date;
-    activity: ScheduleActivity;
+    activity: ScheduleActivity | "travelling";
     location: ScheduleLocation;
     locationId: string;
+    priority: PlanPriority;
 };
 
 export type SequentialPlan = {
@@ -48,6 +59,11 @@ export function generateSequentialPlan(
         };
     }
 
+    const concreteItems = getConcreteScheduleItems(
+        johnCommitments,
+        date
+    );
+
     let currentTime = createPlanTime(date, 0);
 
     let previousActivity: ScheduleActivity | null = previousDayActivity;
@@ -65,6 +81,8 @@ export function generateSequentialPlan(
 
     const planEnd = createPlanTime(date, 24);
 
+    let concreteIndex = 0;
+
     if (previousActivity === "sleeping") {
         const minimumWakeTime =
             createPlanTime(date, 6);
@@ -76,21 +94,112 @@ export function generateSequentialPlan(
             location: {
                 relationship: "home"
             },
-            locationId: home.locationId
+            locationId: home.locationId,
+            priority: getActivityPriority("sleeping")
         });
 
         currentTime = minimumWakeTime;
     }
 
-    while (currentTime < createPlanTime(date, 24)) {
-        console.log(
-            "LOOP:",
-            currentTime.toString(),
-            "<",
-            createPlanTime(date, 24).toString(),
-            "=",
-            currentTime < createPlanTime(date, 24)
-        );
+    while (currentTime < planEnd) {
+        const nextConcreteItem =
+            concreteItems[concreteIndex];
+
+        const currentEntry =
+            entries[entries.length - 1];
+
+        const currentLocationId =
+            currentEntry?.locationId ??
+            home.locationId;
+
+        if (
+            nextConcreteItem &&
+            currentTime >= nextConcreteItem.startTime
+        ) {
+            const currentLocation =
+                world.getRequiredLocation(
+                    currentLocationId
+                );
+
+            const destination =
+                world.getRequiredLocation(
+                    nextConcreteItem.locationId
+                );
+
+            if (
+                currentLocation.id !==
+                destination.id
+            ) {
+                const travelTimeMinutes =
+                    calculateTravelTime(
+                        person,
+                        currentLocation.coordinate,
+                        destination.coordinate
+                    );
+
+                const travelEnd = new Date(
+                    currentTime.getTime() +
+                    travelTimeMinutes * 60 * 1000
+                );
+
+                if (
+                    travelEnd >
+                    nextConcreteItem.startTime
+                ) {
+                    console.log(
+                        "Scheduling conflict:",
+                        {
+                            from: currentLocation.id,
+                            to: destination.id,
+                            currentTime,
+                            travelEnd,
+                            commitmentStart:
+                                nextConcreteItem.startTime
+                        }
+                    );
+
+                    break;
+                }
+
+                entries.push(
+                    createTravelPlanEntry(
+                        currentTime,
+                        travelEnd,
+                        nextConcreteItem.locationId,
+                        {
+                            relationship: "work"
+                        }
+                    )
+                );
+
+                currentTime = travelEnd;
+
+                continue;
+            }
+
+            entries.push({
+                startTime: nextConcreteItem.startTime,
+                endTime: nextConcreteItem.endTime,
+                activity: nextConcreteItem.activity,
+                location: {
+                    relationship: "work"
+                },
+                locationId:
+                    nextConcreteItem.locationId,
+                priority: "fixed"
+            });
+
+            currentTime =
+                nextConcreteItem.endTime;
+
+            previousActivity =
+                nextConcreteItem.activity;
+
+            concreteIndex++;
+
+            continue;
+        }
+
         const availableActivities =
             getAvailableActivities(
                 person,
@@ -115,16 +224,6 @@ export function generateSequentialPlan(
                 return count < limit.max;
             });
 
-        console.log(
-            "AVAILABLE:",
-            currentTime.toLocaleTimeString("en-GB"),
-            availableActivities.map(option => ({
-                activity: option.activity,
-                locationId: option.locationId,
-                weight: option.weight
-            }))
-        );
-
         const activity = chooseNextActivity(
             person,
             johnActivityPreferences,
@@ -136,13 +235,6 @@ export function generateSequentialPlan(
         if (canContinueSleep) {
             canContinueSleep = false;
         }
-
-        console.log(
-            "CHOSEN:",
-            currentTime.toLocaleTimeString("en-GB"),
-            activity?.activity,
-            activity?.locationId
-        );
 
         if (!activity) {
             console.log(
@@ -156,12 +248,13 @@ export function generateSequentialPlan(
 
             entries.push({
                 startTime: currentTime,
-                endTime: createPlanTime(date, 24),
+                endTime: planEnd,
                 activity: "at_home",
                 location: {
                     relationship: "home"
                 },
-                locationId: home.locationId
+                locationId: home.locationId,
+                priority: getActivityPriority("at_home")
             });
 
             break;
@@ -193,19 +286,134 @@ export function generateSequentialPlan(
                 break;
             }
         } else {
+            const currentLocation =
+                world.getRequiredLocation(
+                    activity.locationId
+                );
+
+            const nextConcreteItem =
+                concreteItems[concreteIndex];
+
+            const availableMinutes =
+                getAvailableFlexibleMinutes(
+                    person,
+                    world,
+                    currentTime,
+                    currentLocation.coordinate,
+                    nextConcreteItem
+                );
+
             const duration =
                 chooseActivityDuration(
-                    activity.activity
+                    activity.activity,
+                    availableMinutes
                 );
 
             if (!duration) {
-                    console.log(
-                        "No duration available:",
-                        {
-                            activity: activity.activity,
-                            time: currentTime.toLocaleTimeString("en-GB")
-                        }
+                if (nextConcreteItem) {
+                    const currentEntry =
+                        entries[entries.length - 1];
+
+                    const currentLocation =
+                        world.getRequiredLocation(
+                            currentEntry?.locationId ??
+                            home.locationId
+                        );
+
+                    const destination =
+                        world.getRequiredLocation(
+                            nextConcreteItem.locationId
+                        );
+
+                    // We are already at the commitment location.
+                    // Don't try to travel there again.
+                    if (currentLocation.id === destination.id) {
+                        const slackMinutes =
+                            getSlackMinutes(
+                                currentTime,
+                                nextConcreteItem.startTime
+                            );
+
+                        console.log(
+                            "Slack before commitment:",
+                            {
+                                location: currentLocation.id,
+                                minutes: slackMinutes
+                            }
+                        );
+
+                        entries.push(
+                            createWaitingPlanEntry(
+                                currentTime,
+                                nextConcreteItem.startTime,
+                                currentLocation.id,
+                                {
+                                    relationship: "work"
+                                }
+                            )
+                        );
+
+                        currentTime =
+                            nextConcreteItem.startTime;
+
+                        continue;
+                    }
+
+                    const travelTimeMinutes =
+                        calculateTravelTime(
+                            person,
+                            currentLocation.coordinate,
+                            destination.coordinate
+                        );
+
+                    const travelEnd = new Date(
+                        currentTime.getTime() +
+                        travelTimeMinutes * 60 * 1000
                     );
+
+                    if (
+                        travelEnd >
+                        nextConcreteItem.startTime
+                    ) {
+                        console.log(
+                            "Scheduling conflict:",
+                            {
+                                activity: activity.activity,
+                                currentTime,
+                                travelEnd,
+                                commitmentStart:
+                                    nextConcreteItem.startTime
+                            }
+                        );
+
+                        break;
+                    }
+
+                    entries.push(
+                        createTravelPlanEntry(
+                            currentTime,
+                            travelEnd,
+                            nextConcreteItem.locationId,
+                            {
+                                relationship: "work"
+                            }
+                        )
+                    );
+
+                    currentTime = travelEnd;
+
+                    continue;
+                }
+
+                console.log(
+                    "No duration available:",
+                    {
+                        activity: activity.activity,
+                        time: currentTime.toLocaleTimeString(
+                            "en-GB"
+                        )
+                    }
+                );
 
                 break;
             }
@@ -232,10 +440,14 @@ export function generateSequentialPlan(
             endTime: activityEnd,
             activity: activity.activity,
             location: activity.location,
-            locationId: activity.locationId
+            locationId: activity.locationId,
+            priority: getActivityPriority(activity.activity)
         });
 
-        previousActivity = activity.activity;
+        currentTime = activityEnd;
+
+        previousActivity =
+            activity.activity;
 
         activityCounts[activity.activity] =
             (activityCounts[activity.activity] ?? 0) + 1;
