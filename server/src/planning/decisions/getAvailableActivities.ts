@@ -3,12 +3,12 @@ import type { World } from "../../world/World.js";
 import type {
     ScheduleActivity,
     ScheduleLocation
-} from "../../world/schedule.js";
+} from "../../world/schedules/schedule.js";
 import type { WorldLocation } from "../../world/types.js";
 import type { ActivityOption } from "./chooseNextActivity.js";
 import { locationRelationshipWeights } from "../data/locationWeights.js";
 import { isActivityAllowedAtTime } from "./isActivityAllowedAtTime.js";
-import { activityLocationTypes } from "../data/activityLocationTypes.js";
+import { activityLocationTypes } from "../data/activities/activityLocationTypes.js";
 
 export function getAvailableActivities(
     person: Person,

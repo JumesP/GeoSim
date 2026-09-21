@@ -1,6 +1,6 @@
 import { Person } from "./Person.js";
 import type { Coordinate } from "../world/types.js";
-import type { ScheduleEntry } from "../world/schedule.js";
+import type { ScheduleEntry } from "../world/schedules/schedule.js";
 
 type CreatePersonOptions = {
     id: string;

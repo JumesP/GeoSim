@@ -1,4 +1,4 @@
-import type { ScheduleActivity } from "../world/schedule.js";
+import type { ScheduleActivity } from "../world/schedules/schedule.js";
 
 export type ActivityProbabilities =
     Partial<Record<ScheduleActivity, number>>;

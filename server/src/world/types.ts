@@ -1,4 +1,4 @@
-import type { ScheduleEntry } from "./schedule.js";
+import type { ScheduleEntry } from "./schedules/schedule.js";
 
 export type Coordinate = {
     latitude: number;

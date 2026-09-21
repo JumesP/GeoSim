@@ -2,8 +2,8 @@ import type { Person } from "../../person/Person.js";
 import type {
     ScheduleActivity,
     ScheduleLocation
-} from "../../world/schedule.js";
-import { chooseWeighted } from "../weightedChoice.js";
+} from "../../world/schedules/schedule.js";
+import { chooseWeighted } from "../utilities/weightedChoice.js";
 import type {
     ActivityPreferences,
     LocationPreferences

@@ -1,6 +1,6 @@
 import type { DailyPlan } from "./DailyPlan.js";
-import { activityAlternatives } from "./activityAlternatives.js";
-import { chooseWeighted } from "./weightedChoice.js";
+import { activityAlternatives } from "./mechanics/activities/activityAlternatives.js";
+import { chooseWeighted } from "./utilities/weightedChoice.js";
 
 export function applyDailyPlanDecisions(
     plan: DailyPlan

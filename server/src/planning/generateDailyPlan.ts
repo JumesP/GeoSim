@@ -8,7 +8,7 @@ import {
 } from "./personPlanning.js";
 import {
     rollProbability
-} from "./probability.js";
+} from "./utilities/probability.js";
 import {
     applyDailyPlanDecisions
 } from "./applyDailyPlanDecisions.js";

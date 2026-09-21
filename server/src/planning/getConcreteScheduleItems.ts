@@ -1,5 +1,5 @@
-import type { PersonCommitment } from "./PersonCommitment.js";
-import type { ConcreteScheduleItem } from "./ConcreteScheduleItem.js";
+import type { PersonCommitment } from "./entries/PersonCommitment.js";
+import type { ConcreteScheduleItem } from "./entries/ConcreteScheduleItem.js";
 
 export function getConcreteScheduleItems(
     commitments: PersonCommitment[],

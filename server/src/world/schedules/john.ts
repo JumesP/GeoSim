@@ -1,4 +1,4 @@
-import { ScheduleEntry } from "../schedule.js";
+import { ScheduleEntry } from "./schedule.js";
 
 export const johnSchedule: ScheduleEntry[] = [
     {

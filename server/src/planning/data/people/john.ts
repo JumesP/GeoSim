@@ -1,5 +1,5 @@
-import type { ScheduleActivity } from "../../../world/schedule.js";
-import type { PersonCommitment } from "../../PersonCommitment.js";
+import type { ScheduleActivity } from "../../../world/schedules/schedule.js";
+import type { PersonCommitment } from "../../entries/PersonCommitment.js";
 
 export type ActivityPreferences =
     Partial<Record<ScheduleActivity, number>>;

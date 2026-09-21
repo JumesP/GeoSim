@@ -1,4 +1,4 @@
-import type { ScheduleEntry } from "../world/schedule.js";
+import type { ScheduleEntry } from "../world/schedules/schedule.js";
 
 export type DailyPlanEntry = Omit<
     ScheduleEntry,

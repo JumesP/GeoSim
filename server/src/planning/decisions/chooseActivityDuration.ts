@@ -1,6 +1,6 @@
-import type { ScheduleActivity } from "../../world/schedule.js";
-import { chooseWeighted } from "../weightedChoice.js";
-import { activityDurations } from "../data/activityDurations.js";
+import type { ScheduleActivity } from "../../world/schedules/schedule.js";
+import { chooseWeighted } from "../utilities/weightedChoice.js";
+import { activityDurations } from "../data/activities/activityDurations.js";
 
 export function chooseActivityDuration(
     activity: ScheduleActivity,

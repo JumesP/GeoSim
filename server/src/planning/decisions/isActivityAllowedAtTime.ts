@@ -1,5 +1,5 @@
-import type { ScheduleActivity } from "../../world/schedule.js";
-import { activityTimeWindows } from "../data/activityTimeWindows.js";
+import type { ScheduleActivity } from "../../world/schedules/schedule.js";
+import { activityTimeWindows } from "../data/activities/activityTimeWindows.js";
 
 export function isActivityAllowedAtTime(
     activity: ScheduleActivity,

@@ -1,5 +1,5 @@
-import type { ScheduleActivity } from "../../world/schedule.js";
-import { activityTransitions } from "../data/activityTransitions.js";
+import type { ScheduleActivity } from "../../world/schedules/schedule.js";
+import { activityTransitions } from "../data/activities/activityTransitions.js";
 
 export function getTransitionWeight(
     previousActivity: ScheduleActivity | null,

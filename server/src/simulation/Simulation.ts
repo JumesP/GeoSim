@@ -3,7 +3,7 @@ import { getCurrentScheduleEntry } from "./getCurrentScheduleEntry.js";
 import {
     updateMovement
 } from "./movement.js";
-import type { ScheduleActivity } from "../world/schedule.js";
+import type { ScheduleActivity } from "../world/schedules/schedule.js";
 import type { Person } from "../person/Person.js";
 import { decideTravel } from "./behaviour.js";
 import { generateDailyPlan } from "../planning/generateDailyPlan.js";

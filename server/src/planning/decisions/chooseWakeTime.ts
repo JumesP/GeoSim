@@ -1,4 +1,4 @@
-import { chooseWeighted } from "../weightedChoice.js";
+import { chooseWeighted } from "../utilities/weightedChoice.js";
 
 export type WakeTimeOption = {
     hour: number;

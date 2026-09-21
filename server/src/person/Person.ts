@@ -1,6 +1,6 @@
 import type { Coordinate } from "../world/types.js";
-import type { ScheduleEntry } from "../world/schedule.js";
-import type { ScheduleActivity, ScheduleLocation } from "../world/schedule.js";
+import type { ScheduleEntry } from "../world/schedules/schedule.js";
+import type { ScheduleActivity, ScheduleLocation } from "../world/schedules/schedule.js";
 
 export type PersonLocation = {
     locationId: string;
