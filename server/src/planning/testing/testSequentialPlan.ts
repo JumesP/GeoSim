@@ -1,10 +1,15 @@
 import { generateSequentialPlan } from "../generateSequentialPlan.js";
 import { createWorld } from "../../world/createWorld.js";
-import { createJohn } from "../../person/generator.js";
+import { createPersonFromDefinition } from "../../person/generator.js";
+import { john } from "../data/people/john.js";
 
 const world = createWorld();
 
-const { person } = createJohn(world);
+const { person } =
+    createPersonFromDefinition(
+        world,
+        john
+    );
 
 const date = new Date(
     2026,
@@ -15,17 +20,20 @@ const date = new Date(
 date.setHours(0, 0, 0, 0);
 
 console.log("Person:", person);
+
 console.log(
     "Home:",
     person.getLocation("home")
 );
 
-const plan = generateSequentialPlan(
-    person,
-    world,
-    date,
-    "sleeping"
-);
+const plan =
+    generateSequentialPlan({
+        person,
+        definition: john,
+        world,
+        date,
+        previousDayActivity: "sleeping"
+    });
 
 console.log(
     "Plan generated:",

@@ -4,9 +4,7 @@ import cors from "cors";
 import { Simulation } from "./simulation/Simulation.js";
 import { SimulationRunner } from "./simulation/SimulationRunner.js";
 import { createWorld } from "./world/createWorld.js";
-import { generateDailyPlan } from "./planning/generateDailyPlan.js";
 import { generateSequentialPlan } from "./planning/generateSequentialPlan.js";
-import { World } from "./world/World.js";
 
 const app = express();
 const PORT = 3002;
@@ -20,10 +18,13 @@ const john = world.getPerson("john");
 
 if (john) {
     console.log(
-        generateDailyPlan(
-            john,
-            new Date("2026-09-18T06:00:00Z")
-        )
+        generateSequentialPlan({
+            person: john,
+            definition: john.definition,
+            world,
+            date: new Date("2026-09-18T06:00:00Z"),
+            previousDayActivity: "sleeping"
+        })
     );
 }
 
@@ -92,7 +93,13 @@ app.get("/api/people/:name/plan", (req, res) => {
     }
 
     const plan =
-        generateSequentialPlan(person, world, date);
+        generateSequentialPlan({
+            person,
+            definition: person.definition,
+            world,
+            date,
+            previousDayActivity: "sleeping"
+        });
 
     res.json({
         person: {

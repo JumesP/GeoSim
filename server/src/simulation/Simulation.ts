@@ -1,25 +1,17 @@
-import { World } from "../world/World.js";
-import { getCurrentScheduleEntry } from "./getCurrentScheduleEntry.js";
-import {
-    updateMovement
-} from "./movement.js";
 import type { ScheduleActivity } from "../world/schedules/schedule.js";
 import type { Person } from "../person/Person.js";
-import { decideTravel } from "./behaviour.js";
-import { generateDailyPlan } from "../planning/generateDailyPlan.js";
-import type { DailyPlan } from "../planning/DailyPlan.js";
-import {
-    generateSequentialPlan,
-    SequentialPlan,
-    type SequentialPlanEntry
-} from "../planning/generateSequentialPlan.js";
-import { getCurrentSequentialPlanEntry } from "./getCurrentSequentialPlanEntry.js";
+import { World } from "../world/World.js";
+import { updateMovement } from "./execution/movement.js";
+import { decideTravel } from "./execution/behaviour.js";
+import { generateSequentialPlan } from "../planning/generateSequentialPlan.js";
+import { SequentialPlan } from "../planning/SequentialPlan.js";
+import { getCurrentSequentialPlanEntry } from "./planning/getCurrentSequentialPlanEntry.js";
 
 export type SimulationSpeed = 0 | 0.1 | 0.5 | 1 | 2 | 5 | 10 | 60;
 
 export class Simulation {
     private simulationTime: Date;
-    private speed: SimulationSpeed = 1;
+    private speed: SimulationSpeed = 60; // 1 = 1 second
 
     constructor(
         private readonly world: World,
@@ -142,19 +134,6 @@ export class Simulation {
         }
     }
 
-    private dailyPlans = new Map<
-        string,
-        DailyPlan
-    >();
-
-    private sequentialPlans =
-        new Map<
-            string,
-            SequentialPlan & {
-                lastActivity: ScheduleActivity | null;
-            }
-        >();
-
     getTime(): Date {
         return new Date(this.simulationTime);
     }
@@ -171,78 +150,29 @@ export class Simulation {
         return this.world;
     }
 
-    private getDailyPlan(
-        person: Person
-    ): DailyPlan {
-        const date = this.simulationTime;
-
-        const dateString =
-            new Intl.DateTimeFormat("en-CA", {
-                timeZone: "Europe/London",
-                year: "numeric",
-                month: "2-digit",
-                day: "2-digit"
-            }).format(date);
-
-        const existingPlan =
-            this.dailyPlans.get(person.id);
+    private getSequentialPlan(person: Person): SequentialPlan {
+        const date = this.simulationTime
+            .toISOString()
+            .slice(0, 10);
 
         if (
-            existingPlan &&
-            existingPlan.date === dateString
+            person.plan &&
+            person.plan.date.toISOString().slice(0, 10) === date
         ) {
-            return existingPlan;
+            return person.plan;
         }
 
-        const plan =
-            generateDailyPlan(person, date);
+        const previousDayActivity =
+            person.plan?.entries.at(-1)?.activity ?? null;
 
-        this.dailyPlans.set(
-            person.id,
-            plan
-        );
+        person.plan = generateSequentialPlan({
+            person,
+            definition: person.definition,
+            world: this.world,
+            date: this.simulationTime,
+            previousDayActivity
+        });
 
-        return plan;
-    }
-
-    private getSequentialPlan(
-        person: Person
-    ): SequentialPlan & {
-        lastActivity: ScheduleActivity | null;
-    } {
-        const date =
-            this.simulationTime
-                .toISOString()
-                .slice(0, 10);
-
-        const existing =
-            this.sequentialPlans.get(person.id);
-
-        if (
-            existing &&
-            existing.date.toISOString().slice(0, 10) === date
-        ) {
-            return existing;
-        }
-
-        const plan =
-            generateSequentialPlan(
-                person,
-                this.world,
-                this.simulationTime
-            );
-
-        const planWithLastActivity = {
-            ...plan,
-            lastActivity:
-                plan.entries.at(-1)?.activity ?? null
-        };
-
-        this.sequentialPlans.set(
-            person.id,
-            planWithLastActivity
-        );
-
-        return planWithLastActivity;
+        return person.plan;
     }
 }

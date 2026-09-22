@@ -1,6 +1,6 @@
 import type { Person } from "../../person/Person.js";
 import type { World } from "../../world/World.js";
-import type { SequentialPlanEntry } from "../../planning/generateSequentialPlan.js";
+import type { SequentialPlanEntry } from "../../planning/SequentialPlan.js";
 import type { WorldLocation } from "../../world/types.js";
 
 export function getActivityDestination(

@@ -1,21 +1,13 @@
 import type { Person } from "../person/Person.js";
 import type { World } from "../world/World.js";
-import type {
-    ScheduleActivity,
-    ScheduleLocation
-} from "../world/schedules/schedule.js";
-
+import type { ScheduleActivity, ScheduleLocation } from "../world/schedules/schedule.js";
+import type { PlanPriority } from "./mechanics/planPriority.js";
+import type { PersonDefinition } from "./data/PersonDefinition.js";
 import { chooseNextActivity } from "./decisions/chooseNextActivity.js";
 import { chooseActivityDuration } from "./decisions/chooseActivityDuration.js";
 import { getAvailableActivities } from "./decisions/getAvailableActivities.js";
-import {
-    johnActivityPreferences,
-    johnLocationPreferences,
-    johnCommitments
-} from "./data/people/john.js";
 import { createPlanTime } from "./decisions/createPlanTime.js";
 import { activityLimits } from "./data/activities/activityLimits.js";
-import type { PlanPriority } from "./mechanics/planPriority.js";
 import { getActivityPriority } from "./mechanics/activities/getActivityPriority.js";
 import { getConcreteScheduleItems } from "./getConcreteScheduleItems.js";
 import { getAvailableFlexibleMinutes } from "./travel/getAvailableFlexibleMinutes.js";
@@ -23,33 +15,28 @@ import { createTravelPlanEntry } from "./travel/createTravelPlanEntry.js";
 import { calculateTravelTime } from "../simulation/execution/travel.js";
 import { getSlackMinutes } from "./travel/getSlackMinutes.js";
 import { createWaitingPlanEntry } from "./entries/createWaitingPlanEntry.js";
-import { IdleActivity } from "./idle/IdleActivity.js";
 import { chooseIdleActivity } from "./idle/chooseIdleActivity.js";
 import { cutPlanEntry } from "./mechanics/cutPlanEntry.js";
 import { getMinimumActivityDuration } from "./mechanics/activities/getMinimumActivityDuration.js";
 import { comparePlanPriority } from "./mechanics/comparePlanPriority.js";
+import { SequentialPlanEntry, SequentialPlan } from "./SequentialPlan.js";
 
-export type SequentialPlanEntry = {
-    startTime: Date;
-    endTime: Date;
-    activity: ScheduleActivity | "travelling";
-    idleActivity?: IdleActivity;
-    location: ScheduleLocation;
-    locationId: string;
-    priority: PlanPriority;
-};
-
-export type SequentialPlan = {
+type GenerateSequentialPlanOptions = {
+    person: Person;
+    definition: PersonDefinition;
+    world: World;
     date: Date;
-    entries: SequentialPlanEntry[];
+    previousDayActivity?: ScheduleActivity | null;
 };
 
-export function generateSequentialPlan(
-    person: Person,
-    world: World,
-    date: Date,
-    previousDayActivity: ScheduleActivity | null = null
-): SequentialPlan {
+
+export function generateSequentialPlan({
+    person,
+    definition,
+    world,
+    date,
+    previousDayActivity = null
+}: GenerateSequentialPlanOptions): SequentialPlan {
     const entries: SequentialPlanEntry[] = [];
 
     const activityCounts: Partial<Record<ScheduleActivity, number>> = {};
@@ -66,7 +53,7 @@ export function generateSequentialPlan(
 
     const concreteItems =
         getConcreteScheduleItems(
-            johnCommitments,
+            definition.commitments,
             date
         );
 
@@ -267,8 +254,8 @@ export function generateSequentialPlan(
 
         let activity = chooseNextActivity(
             person,
-            johnActivityPreferences,
-            johnLocationPreferences,
+            definition.activityPreferences,
+            definition.locationPreferences,
             getRemainingActivities(),
             previousActivity
         );
@@ -384,8 +371,8 @@ export function generateSequentialPlan(
                         activity =
                             chooseNextActivity(
                                 person,
-                                johnActivityPreferences,
-                                johnLocationPreferences,
+                                definition.activityPreferences,
+                                definition.locationPreferences,
                                 activitiesWithinLimit.filter(
                                     option =>
                                         !rejectedActivities.has(
@@ -442,8 +429,8 @@ export function generateSequentialPlan(
                     activity =
                         chooseNextActivity(
                             person,
-                            johnActivityPreferences,
-                            johnLocationPreferences,
+                            definition.activityPreferences,
+                            definition.locationPreferences,
                             activitiesWithinLimit.filter(
                                 option =>
                                     !rejectedActivities.has(
@@ -485,8 +472,8 @@ export function generateSequentialPlan(
                     activity =
                         chooseNextActivity(
                             person,
-                            johnActivityPreferences,
-                            johnLocationPreferences,
+                            definition.activityPreferences,
+                            definition.locationPreferences,
                             activitiesWithinLimit.filter(
                                 option =>
                                     !rejectedActivities.has(
@@ -705,8 +692,8 @@ export function generateSequentialPlan(
                     activity =
                         chooseNextActivity(
                             person,
-                            johnActivityPreferences,
-                            johnLocationPreferences,
+                            definition.activityPreferences,
+                            definition.locationPreferences,
                             activitiesWithinLimit.filter(
                                 option =>
                                     !rejectedActivities.has(
@@ -748,8 +735,8 @@ export function generateSequentialPlan(
                     activity =
                         chooseNextActivity(
                             person,
-                            johnActivityPreferences,
-                            johnLocationPreferences,
+                            definition.activityPreferences,
+                            definition.locationPreferences,
                             activitiesWithinLimit.filter(
                                 option =>
                                     !rejectedActivities.has(
@@ -844,8 +831,8 @@ export function generateSequentialPlan(
                             activity =
                                 chooseNextActivity(
                                     person,
-                                    johnActivityPreferences,
-                                    johnLocationPreferences,
+                                    definition.activityPreferences,
+                                    definition.locationPreferences,
                                     activitiesWithinLimit.filter(
                                         option =>
                                             !rejectedActivities.has(
@@ -901,8 +888,8 @@ export function generateSequentialPlan(
                             activity =
                                 chooseNextActivity(
                                     person,
-                                    johnActivityPreferences,
-                                    johnLocationPreferences,
+                                    definition.activityPreferences,
+                                    definition.locationPreferences,
                                     activitiesWithinLimit.filter(
                                         option =>
                                             !rejectedActivities.has(
@@ -954,8 +941,8 @@ export function generateSequentialPlan(
                             activity =
                                 chooseNextActivity(
                                     person,
-                                    johnActivityPreferences,
-                                    johnLocationPreferences,
+                                    definition.activityPreferences,
+                                    definition.locationPreferences,
                                     activitiesWithinLimit.filter(
                                         option =>
                                             !rejectedActivities.has(
@@ -996,18 +983,25 @@ export function generateSequentialPlan(
             /*
              * No valid activity could be found.
              */
-            if (!activity || !activityEnd) {
-                console.log(
-                    "Could not schedule an activity:",
-                    {
-                        time:
-                            currentTime.toLocaleTimeString(
-                                "en-GB"
-                            ),
-                        previousActivity
-                    }
-                );
 
+            if (!activity || !activityEnd) {
+                const remainingMinutes =
+                    (planEnd.getTime() - currentTime.getTime()) / 60000;
+
+                if (remainingMinutes > 0) {
+                    entries.push({
+                        startTime: currentTime,
+                        endTime: planEnd,
+                        activity: "at_home",
+                        location: {
+                            relationship: "home"
+                        },
+                        locationId: home.locationId,
+                        priority: getActivityPriority("at_home")
+                    });
+                }
+
+                currentTime = planEnd;
                 break;
             }
 

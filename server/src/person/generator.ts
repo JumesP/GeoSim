@@ -1,83 +1,43 @@
 import { createPerson } from "./createPerson.js";
 import { createLocation } from "../world/generator.js";
-import { johnSchedule } from "../world/schedules/john.js";
-import { LOCATION_IDS } from "../world/locationIds.js";
 import type { World } from "../world/World.js";
 import type { WorldLocation } from "../world/types.js";
+import type { PersonDefinition } from "../planning/data/PersonDefinition.js";
 
-export function createJohn(
-    world: World
+export function createPersonFromDefinition(
+    world: World,
+    definition: PersonDefinition
 ): {
     person: ReturnType<typeof createPerson>;
     locations: WorldLocation[];
 } {
-    const workplace = world.getRequiredLocation(
-        LOCATION_IDS.office
-    );
-
-    const coffeeShop = world.getRequiredLocation(
-        LOCATION_IDS.coffeeShop
-    );
-
-    const tesco = world.getRequiredLocation(
-        LOCATION_IDS.tesco
-    );
-
-    const restaurant = world.getRequiredLocation(
-        LOCATION_IDS.restaurant
-    );
-
-    const park = world.getRequiredLocation(
-        LOCATION_IDS.park
-    );
-
     const home = createLocation(
-        "john-home",
-        "John's Home",
+        definition.home.id,
+        definition.home.name,
         "home",
-        52.0406,
-        -0.7594
+        definition.home.coordinate.latitude,
+        definition.home.coordinate.longitude
     );
+
+    const personLocations = [
+        {
+            locationId: home.id,
+            relationship: "home" as const
+        },
+        ...definition.locations
+    ];
 
     const person = createPerson({
-        id: "john",
-        name: "John",
-        age: 24,
-
-        locations: [
-            {
-                locationId: home.id,
-                relationship: "home"
-            },
-            {
-                locationId: workplace.id,
-                relationship: "work"
-            },
-            {
-                locationId: coffeeShop.id,
-                relationship: "favourite"
-            },
-            {
-                locationId: tesco.id,
-                relationship: "regular"
-            },
-            {
-                locationId: restaurant.id,
-                relationship: "favourite"
-            },
-            {
-                locationId: park.id,
-                relationship: "regular"
-            }
-        ],
-
+        id: definition.id,
+        name: definition.name,
+        age: definition.age,
+        locations: personLocations,
         currentLocation: home.coordinate,
-
-        schedule: johnSchedule
+        definition
     });
 
     return {
         person,
-        locations: [home, workplace, coffeeShop, tesco, restaurant]
+        locations: [home]
     };
 }

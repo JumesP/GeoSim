@@ -22,21 +22,25 @@ type PersonLocation = {
         | "regular";
 };
 
-type ScheduleEntry = {
-    id: string;
-    name: string;
-    startHour: number;
-    endHour: number;
+type PlanEntry = {
+    startTime: string;
+    endTime: string;
     activity:
         | "sleeping"
         | "waking"
         | "at_home"
         | "working"
-        | "eating"
+        | "lunch"
         | "shopping"
         | "exercising"
         | "socialising"
+        | "waiting"
         | "travelling";
+    idleActivity?:
+        | "walking_around"
+        | "on_phone"
+        | "looking_around"
+        | "waiting";
     location: {
         relationship:
             | "home"
@@ -49,6 +53,17 @@ type ScheduleEntry = {
             | "park"
             | "gym";
     };
+    locationId: string;
+    priority:
+        | "low"
+        | "normal"
+        | "high"
+        | "fixed";
+};
+
+type SequentialPlan = {
+    date: string;
+    entries: PlanEntry[];
 };
 
 type Person = {
@@ -56,7 +71,7 @@ type Person = {
     name: string;
     age: number;
     profilePicture?: string;
-    schedule: ScheduleEntry[];
+    plan: SequentialPlan | null;
     currentLocation: {
         latitude: number;
         longitude: number;
@@ -163,7 +178,7 @@ export default function GeoMap() {
         const loadWorld = async () => {
             try {
                 const response = await fetch(
-                    "http://localhost:3001/api/world"
+                    "http://localhost:3002/api/world"
                 );
 
                 if (!response.ok) {
@@ -440,6 +455,17 @@ export default function GeoMap() {
                             )
                             : "--:--:--"}
                     </p>
+                    <p className="text-sm text-white/60">
+                        {simulationTime
+                            ? simulationTime.toLocaleDateString(
+                                "en-GB",
+                                {
+                                    timeZone: "Europe/London",
+                                    weekday: "long"
+                                }
+                            )
+                            : "—"}
+                    </p>
                 </div>
 
 
@@ -583,24 +609,48 @@ export default function GeoMap() {
                 />
             </div>
 
-            {/* Schedule visual aid */}
+            {/* Daily Plan visual aid */}
             <div className="">
-                {world && world.people.map((person) => (
+                {world?.people.map((person) => (
                     <div key={person.id}>
                         <p>{person.name}</p>
-                        {person.schedule.map((scheduleItem) => (
-                            <p className="text-sm text-white/60 border-gray-500 border-b-4 pl-2 w-fit" key={scheduleItem.id}>
+
+                        {person.plan?.entries.map((planItem) => (
+                            <div
+                                className="text-sm text-white/60 border-gray-500 border-b-4 pl-2 w-fit"
+                                key={`${planItem.startTime}-${planItem.activity}`}
+                            >
                                 <p className="text-xs text-white/40">
-                                    {scheduleItem.startHour} - {scheduleItem.endHour}
+                                    {new Date(planItem.startTime).toLocaleTimeString(
+                                        "en-GB",
+                                        {
+                                            timeZone: "Europe/London",
+                                            hour: "2-digit",
+                                            minute: "2-digit"
+                                        }
+                                    )}
+                                    {" - "}
+                                    {new Date(planItem.endTime).toLocaleTimeString(
+                                        "en-GB",
+                                        {
+                                            timeZone: "Europe/London",
+                                            hour: "2-digit",
+                                            minute: "2-digit"
+                                        }
+                                    )}
                                 </p>
+
                                 <p className="text-sm text-white/60">
-                                    {scheduleItem.activity} at {scheduleItem.location.type ? scheduleItem.location.type : scheduleItem.location.relationship}
+                                    {planItem.activity}
+                                    {" at "}
+                                    {planItem.location.type
+                                        ?? planItem.location.relationship}
                                 </p>
-                            </p>
+                            </div>
                         ))}
                     </div>
                 ))}
             </div>
-            </>
+        </>
     );
 }

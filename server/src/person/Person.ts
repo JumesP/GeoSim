@@ -1,6 +1,7 @@
 import type { Coordinate } from "../world/types.js";
-import type { ScheduleEntry } from "../world/schedules/schedule.js";
 import type { ScheduleActivity, ScheduleLocation } from "../world/schedules/schedule.js";
+import type { PersonDefinition } from "../planning/data/PersonDefinition.js";
+import type { SequentialPlan } from "../planning/SequentialPlan.js";
 
 export type PersonLocation = {
     locationId: string;
@@ -28,32 +29,27 @@ export class Person {
         public readonly id: string,
         public readonly name: string,
         public readonly age: number,
-
         public readonly locations: PersonLocation[],
-
         public currentLocation: Coordinate,
-
         public status: ScheduleActivity,
-
         public destinationId: string | null,
-
-        public schedule: ScheduleEntry[],
-
         public movement: PersonMovement | null,
-
         public travelMode: TravelMode,
-
+        public plan: SequentialPlan | null,
         public movementSpeed: {
             walking: number;
-            cycling: number;
-            driving: number;
+            cycling?: number;
+            driving?: number;
         },
-
-        public readonly profilePicture?: string
-    ) { }
+        public readonly definition: PersonDefinition,
+        public readonly profilePicture?: string,
+    ) {}
 
     setStatus(status: ScheduleActivity): void {
         this.status = status;
+    }
+    setPlan(plan: SequentialPlan | null): void {
+        this.plan = plan;
     }
 
     setDestination(destinationId: string | null): void {

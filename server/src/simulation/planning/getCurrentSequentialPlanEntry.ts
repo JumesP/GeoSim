@@ -1,4 +1,4 @@
-import type { SequentialPlanEntry } from "../../planning/generateSequentialPlan.js";
+import type { SequentialPlanEntry } from "../../planning/SequentialPlan.js";
 
 export function getCurrentSequentialPlanEntry(
     plan: SequentialPlanEntry[],

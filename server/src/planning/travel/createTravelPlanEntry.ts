@@ -1,6 +1,6 @@
 import type { Coordinate } from "../../world/types.js";
 import type { ScheduleLocation } from "../../world/schedules/schedule.js";
-import type { SequentialPlanEntry } from "../generateSequentialPlan.js";
+import type { SequentialPlanEntry } from "../SequentialPlan.js";
 
 export function createTravelPlanEntry(
     startTime: Date,

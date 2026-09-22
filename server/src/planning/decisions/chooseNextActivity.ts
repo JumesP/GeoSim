@@ -7,7 +7,7 @@ import { chooseWeighted } from "../utilities/weightedChoice.js";
 import type {
     ActivityPreferences,
     LocationPreferences
-} from "../data/people/john.js";
+} from "../data/PersonDefinition.js";
 import { getTransitionWeight } from "./getTransitionWeight.js";
 
 
@@ -50,6 +50,18 @@ export function chooseNextActivity(
                     transitionWeight
             };
     });
+
+    console.log(
+        "CHOOSING ACTIVITY:",
+        {
+            previousActivity,
+            options: weightedOptions.map(option => ({
+                activity: option.value.activity,
+                locationId: option.value.locationId,
+                weight: option.weight
+            }))
+        }
+    );
 
     return chooseWeighted(weightedOptions);
 }

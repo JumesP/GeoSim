@@ -1,4 +1,4 @@
-import type { SequentialPlanEntry } from "../generateSequentialPlan.js";
+import type { SequentialPlanEntry } from "../SequentialPlan.js";
 
 export function cutPlanEntry(
     entry: SequentialPlanEntry,

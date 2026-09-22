@@ -3,7 +3,7 @@ import type { World } from "../../world/World.js";
 import { getNextDestinationActivity } from "./../planning/getNextDestinationActivity.js";
 import { getDepartureTime } from "./../schedule/getDepartureTime.js";
 import { calculateTravelTime } from "./travel.js";
-import type { SequentialPlanEntry } from "../../planning/generateSequentialPlan.js";
+import type { SequentialPlanEntry } from "../../planning/SequentialPlan.js";
 
 export function decideTravel(
     person: Person,

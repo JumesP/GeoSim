@@ -39,7 +39,8 @@ export const activityTransitions:
     socialising: {
         at_home: 70,
         shopping: 10,
-        exercising: 10
+        exercising: 10,
+        sleeping: 200
     },
 
     at_home: {
@@ -47,6 +48,7 @@ export const activityTransitions:
         shopping: 20,
         exercising: 20,
         socialising: 20,
-        at_home: 10
+        at_home: 10,
+        sleeping: 80
     }
 };

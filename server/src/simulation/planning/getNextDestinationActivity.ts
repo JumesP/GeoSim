@@ -1,7 +1,7 @@
 import type { Person } from "../../person/Person.js";
 import type { World } from "../../world/World.js";
-import type { SequentialPlanEntry } from "../../planning/generateSequentialPlan.js";
-import { getPersonLocation } from "../../world/getPersonLocation.js";
+import type { SequentialPlanEntry } from "../../planning/SequentialPlan.js";
+import { getPersonLocation } from "../../world/locations/getPersonLocation.js";
 import { getCurrentSequentialPlanEntry } from "./getCurrentSequentialPlanEntry.js";
 
 export function getNextDestinationActivity(
