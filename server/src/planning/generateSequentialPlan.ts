@@ -360,10 +360,24 @@ export function generateSequentialPlan({
                     * We need to be able to get home
                     * before the end of the plan.
                     */
-                    if (
-                        travelEnd >=
-                        planEnd
-                    ) {
+                    if (travelEnd >= planEnd) {
+                        if (travelEnd > planEnd) {
+                            entries.push(
+                                createTravelPlanEntry(
+                                    currentTime,
+                                    travelEnd,
+                                    home.locationId,
+                                    {
+                                        relationship: "home"
+                                    }
+                                )
+                            );
+
+                            currentTime = travelEnd;
+
+                            break;
+                        }
+                        
                         rejectedActivities.add(
                             activityKey
                         );
